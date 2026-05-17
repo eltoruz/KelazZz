@@ -1,6 +1,6 @@
 s# KelazZz — Aplikasi Presensi Mahasiswa ITERA
 
-![CI](https://github.com/MuhammadBintangAl-Fasya/KelazZz/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/user-attachments/assets/082ccee7-c661-46bf-9a91-a7ab386d9410)
 
 > Aplikasi mobile multiplatform yang menghadirkan pengalaman presensi dan layanan akademik yang lebih cepat, cerdas, dan mudah digunakan bagi mahasiswa Institut Teknologi Sumatera.
 
