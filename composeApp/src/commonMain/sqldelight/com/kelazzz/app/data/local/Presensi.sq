@@ -30,7 +30,7 @@ SELECT DISTINCT mataKuliahId, mataKuliahNama FROM PresensiEntity;
 -- Get attendance summary per mata kuliah
 getAttendanceSummary:
 SELECT mataKuliahId, mataKuliahNama,
-       COUNT(*) AS totalPertemuan,
+       SUM(CASE WHEN status IN ('HADIR', 'ALPHA', 'IZIN', 'SAKIT') THEN 1 ELSE 0 END) AS totalPertemuan,
        SUM(CASE WHEN status = 'HADIR' THEN 1 ELSE 0 END) AS totalHadir,
        SUM(CASE WHEN status = 'ALPHA' THEN 1 ELSE 0 END) AS totalAlpha,
        SUM(CASE WHEN status = 'IZIN' THEN 1 ELSE 0 END) AS totalIzin,

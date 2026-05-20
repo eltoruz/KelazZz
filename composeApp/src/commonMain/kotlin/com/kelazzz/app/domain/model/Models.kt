@@ -23,7 +23,8 @@ enum class StatusPresensi(val displayName: String) {
     HADIR("Hadir"),
     ALPHA("Alpha"),
     IZIN("Izin"),
-    SAKIT("Sakit");
+    SAKIT("Sakit"),
+    BELUM_MULAI("Belum Mulai");
     
     companion object {
         fun fromString(value: String): StatusPresensi {
@@ -49,8 +50,8 @@ data class AttendanceSummary(
     
     val riskLevel: RiskLevel
         get() = when {
-            persentaseKehadiran >= 80f -> RiskLevel.AMAN
-            persentaseKehadiran >= 70f -> RiskLevel.WARNING
+            totalAlpha <= 2 -> RiskLevel.AMAN
+            totalAlpha == 3 -> RiskLevel.WARNING
             else -> RiskLevel.BAHAYA
         }
 }

@@ -112,7 +112,7 @@ class PresensiRepositoryImpl(
                     AttendanceSummary(
                         mataKuliahId = entity.mataKuliahId,
                         mataKuliahNama = entity.mataKuliahNama,
-                        totalPertemuan = entity.totalPertemuan.toInt(),
+                        totalPertemuan = entity.totalPertemuan?.toInt() ?: 0,
                         totalHadir = entity.totalHadir?.toInt() ?: 0,
                         totalAlpha = entity.totalAlpha?.toInt() ?: 0,
                         totalIzin = entity.totalIzin?.toInt() ?: 0,
@@ -120,6 +120,68 @@ class PresensiRepositoryImpl(
                     )
                 }
             }
+
+    override suspend fun syncPresensiForKelas(kelasId: String, mataKuliahNama: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val token = userPreferences.authToken.first()
+                    ?: return@withContext Result.failure(Exception("Sesi login tidak ditemukan. Harap login kembali."))
+                val deviceId = userPreferences.deviceId.first() ?: ""
+                val nim = userPreferences.userNim.first()
+                    ?: return@withContext Result.failure(Exception("NIM mahasiswa tidak ditemukan."))
+                val email = userPreferences.userEmail.first() ?: "$nim@student.itera.ac.id"
+
+                // Lakukan registrasi token/sesi terlebih dahulu
+                val registerResult = apiService.registerToken(token = token, deviceId = deviceId, email = email)
+                if (registerResult.isFailure) {
+                    return@withContext Result.failure(
+                        registerResult.exceptionOrNull() ?: Exception("Gagal otorisasi token sesi.")
+                    )
+                }
+
+                // Ambil data presensi
+                val result = apiService.getPresensiDetail(
+                    token = token,
+                    deviceId = deviceId,
+                    nim = nim,
+                    kelasKode = kelasId
+                )
+
+                if (result.isSuccess) {
+                    val response = result.getOrThrow()
+                    if (response.meta.status) {
+                        val lastSyncStr = Clock.System.now().toString()
+                        
+                        queries.transaction {
+                            queries.deletePresensiByMataKuliah(kelasId)
+                            response.data.forEach { data ->
+                                val status = when {
+                                    data.pertemuan.isNullOrBlank() || data.waktuMulai.isNullOrBlank() -> "BELUM_MULAI"
+                                    data.absenMahasiswa == "1" -> "HADIR"
+                                    else -> "ALPHA"
+                                }
+                                queries.insertPresensi(
+                                    mataKuliahId = kelasId,
+                                    mataKuliahNama = mataKuliahNama,
+                                    pertemuan = data.noPertemuan.toLong(),
+                                    status = status,
+                                    tanggal = data.waktuMulai ?: "",
+                                    lastSync = lastSyncStr
+                                )
+                            }
+                        }
+                        Result.success(Unit)
+                    } else {
+                        Result.failure(Exception(response.meta.message))
+                    }
+                } else {
+                    Result.failure(result.exceptionOrNull() ?: Exception("Gagal sinkronisasi data presensi."))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 
     override suspend fun submitPresensi(token: String): Result<Unit> {
         // Stub untuk pengiriman token presensi

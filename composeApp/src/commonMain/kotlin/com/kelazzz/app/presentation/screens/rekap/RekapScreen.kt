@@ -3,6 +3,7 @@ package com.kelazzz.app.presentation.screens.rekap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,6 +41,7 @@ import com.kelazzz.app.domain.model.Kelas
 import com.kelazzz.app.domain.model.RiskLevel
 import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RekapScreen(
     viewModel: RekapViewModel = koinViewModel(),
@@ -175,13 +177,34 @@ fun RekapScreen(
                             ) { uiModel ->
                                 KelasCardItem(
                                     uiModel = uiModel,
-                                    onClick = { onKelasClick(uiModel.kelas.kodeKelas) }
+                                    onClick = { 
+                                        viewModel.selectKelas(uiModel.kelas)
+                                        onKelasClick(uiModel.kelas.kodeKelas) 
+                                    }
                                 )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    // Menampilkan Bottom Sheet detail presensi jika selectedKelas != null
+    if (uiState.selectedKelas != null) {
+        val selectedKelas = uiState.selectedKelas!!
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.dismissKelasDetail() },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp
+        ) {
+            KelasPresensiDetailSheet(
+                kelas = selectedKelas,
+                isLoading = uiState.isDetailLoading,
+                presensiList = uiState.presensiDetailList,
+                onDismiss = { viewModel.dismissKelasDetail() }
+            )
         }
     }
 }
@@ -197,18 +220,18 @@ private fun KelasCardItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(14.dp)
         ) {
             // Row Atas: Kode MK & Badge Kelas
             Row(
@@ -223,22 +246,15 @@ private fun KelasCardItem(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = "Kelas ${kelas.namaKelas}",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
+                Text(
+                    text = "Kelas ${kelas.namaKelas}",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                )
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Judul Mata Kuliah
             Text(
@@ -246,122 +262,85 @@ private fun KelasCardItem(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
-            // Dosen & SKS
-            Text(
-                text = "Dosen: ${kelas.namaDosenList.ifBlank { "Tidak ada nama dosen" }}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+            // Dosen
+            if (kelas.namaDosenList.isNotBlank()) {
+                Text(
+                    text = kelas.namaDosenList,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
 
-            Text(
-                text = "${kelas.sksMk} SKS • Mode: ${kelas.mode ?: "Luring"}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                modifier = Modifier.padding(top = 2.dp)
-            )
+            Spacer(modifier = Modifier.height(10.dp))
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Bagian Performa Kehadiran (Analytics)
+            // Bottom Section: Status Kehadiran Minimalis
             if (summary != null) {
-                val percentage = summary.persentaseKehadiran
-                val progress = percentage / 100f
-
-                // Tentukan warna performa berdasarkan ambang batas kehadiran ITERA (80%)
-                val performanceColor = when (summary.riskLevel) {
-                    RiskLevel.AMAN -> Color(0xFF2E7D32) // Hijau
-                    RiskLevel.WARNING -> Color(0xFFEF6C00) // Oranye
-                    RiskLevel.BAHAYA -> Color(0xFFC62828) // Merah
-                }
-
-                val badgeText = when (summary.riskLevel) {
-                    RiskLevel.AMAN -> "Aman ✅"
-                    RiskLevel.WARNING -> "Warning ⚠️"
-                    RiskLevel.BAHAYA -> "Bahaya 🚨"
+                val alphaCount = summary.totalAlpha
+                val statusText: String?
+                val statusColor: Color
+                
+                when {
+                    alphaCount <= 2 -> {
+                         statusText = null
+                         statusColor = Color.Transparent
+                    }
+                    alphaCount == 3 -> {
+                         statusText = "Alpha: 3/3 (Batas Maks)"
+                         statusColor = Color(0xFFEF6C00) // Oranye
+                    }
+                    else -> {
+                         statusText = "Alpha: $alphaCount/3 (Bahaya)"
+                         statusColor = Color(0xFFC62828) // Merah
+                    }
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = if (statusText != null) Arrangement.SpaceBetween else Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Kehadiran: ${percentage.toInt()}%",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = performanceColor
-                            )
-                            Text(
-                                text = "${summary.totalHadir}/${summary.totalPertemuan} Pertemuan",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        LinearProgressIndicator(
-                            progress = { progress },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            color = performanceColor,
-                            trackColor = performanceColor.copy(alpha = 0.15f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    // Chip status performa
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(performanceColor.copy(alpha = 0.1f))
-                            .border(1.dp, performanceColor.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
+                    if (statusText != null) {
                         Text(
-                            text = badgeText,
-                            style = MaterialTheme.typography.labelMedium,
+                            text = statusText,
+                            style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
-                            color = performanceColor
+                            color = statusColor
                         )
                     }
+                    
+                    Text(
+                        text = "Kehadiran: ${summary.persentaseKehadiran.toInt()}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             } else {
-                // Tampilan saat data presensi pertemuan belum disinkronisasi
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(12.dp)
+                        .padding(8.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = "Presensi belum disinkronisasi. Buka detail atau tekan sinkronisasi.",
+                            text = "Presensi belum disinkronisasi. Klik detail untuk sinkron.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -426,6 +405,261 @@ private fun EmptyStateView(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Sinkronisasi Kelas Sekarang")
+            }
+        }
+    }
+}
+
+@Composable
+private fun KelasPresensiDetailSheet(
+    kelas: Kelas,
+    isLoading: Boolean,
+    presensiList: List<com.kelazzz.app.domain.model.Presensi>,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.85f)
+            .padding(16.dp)
+    ) {
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = kelas.namaMk,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "${kelas.kodeMk} • Kelas ${kelas.namaKelas}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            IconButton(onClick = onDismiss) {
+                Icon(imageVector = Icons.Default.Clear, contentDescription = "Tutup")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Dosen Pengampu
+        Text(
+            text = "Dosen: ${kelas.namaDosenList.ifBlank { "Tidak ada nama dosen" }}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Loading Indicator
+        if (isLoading) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        // Summary Card
+        val validMeetings = presensiList.filter { it.status != com.kelazzz.app.domain.model.StatusPresensi.BELUM_MULAI }
+        val totalHadir = validMeetings.count { it.status == com.kelazzz.app.domain.model.StatusPresensi.HADIR }
+        val totalAlpha = validMeetings.count { it.status == com.kelazzz.app.domain.model.StatusPresensi.ALPHA }
+        val totalPertemuan = validMeetings.size
+
+        val percentage = if (totalPertemuan > 0) (totalHadir.toFloat() / totalPertemuan * 100).toInt() else 100
+        
+        val performanceColor: Color
+        val statusText: String
+        val warningMessage: String
+        
+        when {
+            totalAlpha <= 2 -> {
+                performanceColor = Color(0xFF2E7D32) // Hijau
+                statusText = "Kehadiran Aman"
+                warningMessage = "Sisa jatah alpha Anda: ${3 - totalAlpha} kali."
+            }
+            totalAlpha == 3 -> {
+                performanceColor = Color(0xFFEF6C00) // Oranye
+                statusText = "Batas Maksimal!"
+                warningMessage = "Jatah alpha habis (3/3). Hati-hati jangan sampai absen lagi."
+            }
+            else -> {
+                performanceColor = Color(0xFFC62828) // Merah
+                statusText = "Terancam Tidak Bisa UAS"
+                warningMessage = "Alpha: $totalAlpha kali (Melebihi batas maksimal 3 kali)."
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = performanceColor.copy(alpha = 0.08f)),
+            border = BorderStroke(1.dp, performanceColor.copy(alpha = 0.2f))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = performanceColor
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Hadir: $totalHadir | Alpha: $totalAlpha | Terlaksana: $totalPertemuan",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Text(
+                    text = "$percentage%",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = performanceColor
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // List Pertemuan 1-16
+        Text(
+            text = "Daftar Pertemuan (1-16)",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        if (presensiList.isEmpty() && !isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Data presensi tidak tersedia offline.\nHarap sambungkan ke internet untuk melakukan sinkronisasi.",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
+                // Urutkan pertemuan berdasarkan nomor 1 sampai 16
+                val sortedList = presensiList.sortedBy { it.pertemuan }
+                
+                items(sortedList) { presensi ->
+                    PertemuanItemRow(presensi = presensi)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PertemuanItemRow(
+    presensi: com.kelazzz.app.domain.model.Presensi
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Pertemuan ${presensi.pertemuan}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                val formattedDate = if (presensi.tanggal.isNotBlank()) {
+                    presensi.tanggal
+                } else {
+                    "Jadwal belum ditentukan"
+                }
+                
+                Text(
+                    text = formattedDate,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Badge Status Kehadiran
+            val badgeColor: Color
+            val badgeTextColor: Color
+            val badgeText: String
+            
+            when (presensi.status) {
+                com.kelazzz.app.domain.model.StatusPresensi.HADIR -> {
+                    badgeColor = Color(0xFFE8F5E9)
+                    badgeTextColor = Color(0xFF2E7D32)
+                    badgeText = "Hadir"
+                }
+                com.kelazzz.app.domain.model.StatusPresensi.ALPHA -> {
+                    badgeColor = Color(0xFFFFEBEE)
+                    badgeTextColor = Color(0xFFC62828)
+                    badgeText = "Alpha"
+                }
+                com.kelazzz.app.domain.model.StatusPresensi.BELUM_MULAI -> {
+                    badgeColor = MaterialTheme.colorScheme.surfaceVariant
+                    badgeTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    badgeText = "Belum Ada"
+                }
+                else -> {
+                    badgeColor = MaterialTheme.colorScheme.surfaceVariant
+                    badgeTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    badgeText = "-"
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(badgeColor)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = badgeText,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = badgeTextColor
+                )
             }
         }
     }

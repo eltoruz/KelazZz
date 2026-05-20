@@ -56,6 +56,23 @@ data class KelasData(
 )
 
 @Serializable
+data class PresensiResponse(
+    val meta: PocketMeta,
+    val data: List<PresensiData> = emptyList()
+)
+
+@Serializable
+data class PresensiData(
+    @SerialName("no_pertemuan") val noPertemuan: Int,
+    @SerialName("pertemuan") val pertemuan: String? = null,
+    @SerialName("waktu_mulai") val waktuMulai: String? = null,
+    @SerialName("mhs_masuk") val mhsMasuk: String? = null,
+    @SerialName("mhs_tdkmasuk") val mhsTdkMasuk: String? = null,
+    @SerialName("mhs_jumlah") val mhsJumlah: String? = null,
+    @SerialName("absen_mahasiswa") val absenMahasiswa: String? = null
+)
+
+@Serializable
 data class LoginResponse(
     val meta: PocketMeta,
     @Serializable(with = LoginDataSerializer::class)
@@ -282,6 +299,55 @@ class PocketApiService(private val client: HttpClient) {
             Result.failure(Exception("Tidak ada koneksi internet untuk otorisasi."))
         } catch (e: Exception) {
             Result.failure(Exception("Terjadi kesalahan otorisasi: ${e.message ?: "Kesalahan tidak diketahui"}"))
+        }
+    }
+
+    /**
+     * Mengambil riwayat detail kehadiran pertemuan per mata kuliah
+     *
+     * @param token Token auth dari Pocket
+     * @param deviceId Device ID
+     * @param nim NIM mahasiswa
+     * @param kelasKode Kode kelas (kode_kelas dari data kelas)
+     */
+    suspend fun getPresensiDetail(
+        token: String,
+        deviceId: String,
+        nim: String,
+        kelasKode: String
+    ): Result<PresensiResponse> {
+        return try {
+            val response = client.submitForm(
+                url = "$BASE_URL/presensi/data_mahasiswa",
+                formParameters = Parameters.build {
+                    append("nim", nim)
+                    append("kelas", kelasKode)
+                }
+            ) {
+                header("User-Agent", USER_AGENT)
+                header("Accept", "*/*")
+                header("Authorization", token)
+                header("X-Device-Id", deviceId)
+            }
+            Result.success(response.body<PresensiResponse>())
+        } catch (e: HttpRequestTimeoutException) {
+            Result.failure(Exception("Koneksi timeout saat mengambil detail presensi."))
+        } catch (e: ClientRequestException) {
+            val errorMessage = try {
+                val errorBody = e.response.body<PresensiResponse>()
+                errorBody.meta.message
+            } catch (_: Exception) {
+                "Gagal mengambil detail presensi. Sesi tidak valid."
+            }
+            Result.failure(Exception(errorMessage))
+        } catch (e: ServerResponseException) {
+            Result.failure(Exception("Server ITERA sedang gangguan saat mengambil presensi (${e.response.status.value})."))
+        } catch (e: SerializationException) {
+            Result.failure(Exception("Server mengembalikan format presensi yang tidak valid."))
+        } catch (e: IOException) {
+            Result.failure(Exception("Tidak ada koneksi internet untuk memperbarui detail presensi."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Terjadi kesalahan: ${e.message ?: "Kesalahan tidak diketahui"}"))
         }
     }
 }

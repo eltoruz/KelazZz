@@ -30,6 +30,9 @@ interface PresensiRepository {
     /** Submit presensi via token */
     suspend fun submitPresensi(token: String): Result<Unit>
     
+    /** Sync data presensi spesifik mata kuliah dari API ke local cache */
+    suspend fun syncPresensiForKelas(kelasId: String, mataKuliahNama: String): Result<Unit>
+
     /** Sync data presensi dari API ke local cache */
     suspend fun syncPresensi(): Result<Unit>
 }

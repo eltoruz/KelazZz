@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kelazzz.app.domain.model.AttendanceSummary
 import com.kelazzz.app.domain.model.Kelas
+import com.kelazzz.app.domain.model.Presensi
 import com.kelazzz.app.domain.repository.PresensiRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +31,10 @@ data class RekapUiState(
     val kelasList: List<KelasUiModel> = emptyList(),
     val searchQuery: String = "",
     val error: String? = null,
-    val syncSuccess: Boolean = false
+    val syncSuccess: Boolean = false,
+    val selectedKelas: Kelas? = null,
+    val isDetailLoading: Boolean = false,
+    val presensiDetailList: List<Presensi> = emptyList()
 ) {
     val filteredKelasList: List<KelasUiModel>
         get() = if (searchQuery.isBlank()) {
@@ -125,5 +129,58 @@ class RekapViewModel(
      */
     fun clearSyncSuccess() {
         _uiState.update { it.copy(syncSuccess = false) }
+    }
+
+    private var detailJob: kotlinx.coroutines.Job? = null
+
+    /**
+     * Memilih mata kuliah untuk menampilkan detail presensi pertemuan
+     */
+    fun selectKelas(kelas: Kelas) {
+        _uiState.update { 
+            it.copy(
+                selectedKelas = kelas, 
+                isDetailLoading = true
+            ) 
+        }
+        
+        detailJob?.cancel()
+        detailJob = viewModelScope.launch {
+            // 1. Observe data lokal
+            launch {
+                repository.getPresensiByMataKuliah(kelas.kodeKelas)
+                    .collect { list ->
+                        _uiState.update { 
+                            it.copy(
+                                presensiDetailList = list,
+                                isDetailLoading = list.isEmpty()
+                            ) 
+                        }
+                    }
+            }
+            
+            // 2. Trigger sync background dari API
+            launch {
+                val result = repository.syncPresensiForKelas(kelas.kodeKelas, kelas.namaMk)
+                _uiState.update { it.copy(isDetailLoading = false) }
+                if (result.isFailure) {
+                    _uiState.update { it.copy(error = result.exceptionOrNull()?.message) }
+                }
+            }
+        }
+    }
+
+    /**
+     * Menutup sheet detail mata kuliah
+     */
+    fun dismissKelasDetail() {
+        detailJob?.cancel()
+        _uiState.update { 
+            it.copy(
+                selectedKelas = null, 
+                presensiDetailList = emptyList(),
+                isDetailLoading = false
+            ) 
+        }
     }
 }
