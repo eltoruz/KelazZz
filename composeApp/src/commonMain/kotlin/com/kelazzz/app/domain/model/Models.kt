@@ -95,3 +95,18 @@ enum class JenisJadwal(val displayName: String) {
         }
     }
 }
+
+/**
+ * Domain model untuk Kelas / Mata Kuliah aktif mahasiswa
+ */
+data class Kelas(
+    val nomorMk: String,
+    val kodeMk: String,
+    val kodeKelas: String,
+    val namaKelas: String,
+    val mode: String?,
+    val namaMk: String,
+    val sksMk: String,
+    val namaDosenList: String,
+    val jadwalHari: String
+)

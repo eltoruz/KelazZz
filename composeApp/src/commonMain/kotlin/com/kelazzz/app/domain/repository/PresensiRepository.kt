@@ -2,6 +2,7 @@ package com.kelazzz.app.domain.repository
 
 import com.kelazzz.app.domain.model.AttendanceSummary
 import com.kelazzz.app.domain.model.Presensi
+import com.kelazzz.app.domain.model.Kelas
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -11,6 +12,12 @@ import kotlinx.coroutines.flow.Flow
  * Domain layer mendefinisikan interface, Data layer mengimplementasikan.
  */
 interface PresensiRepository {
+    /** Get daftar kelas mahasiswa dari cache lokal */
+    fun getKelasList(): Flow<List<Kelas>>
+    
+    /** Sync daftar kelas dari API ke local cache */
+    suspend fun syncKelas(): Result<Unit>
+
     /** Get semua rekap presensi dari cache lokal */
     fun getAllPresensi(): Flow<List<Presensi>>
     

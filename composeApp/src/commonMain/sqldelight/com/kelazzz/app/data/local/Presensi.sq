@@ -55,3 +55,29 @@ WHERE mataKuliahId = ?;
 -- Count total presensi records
 countPresensi:
 SELECT COUNT(*) FROM PresensiEntity;
+
+-- Kelas / Mata Kuliah table schema
+CREATE TABLE KelasEntity (
+    kodeKelas TEXT NOT NULL PRIMARY KEY,
+    nomorMk TEXT NOT NULL,
+    kodeMk TEXT NOT NULL,
+    namaKelas TEXT NOT NULL,
+    mode TEXT,
+    namaMk TEXT NOT NULL,
+    sksMk TEXT NOT NULL,
+    namaDosenList TEXT NOT NULL,
+    jadwalHari TEXT NOT NULL
+);
+
+-- Get all kelas records
+getAllKelas:
+SELECT * FROM KelasEntity;
+
+-- Insert or replace kelas record
+insertKelas:
+INSERT OR REPLACE INTO KelasEntity (kodeKelas, nomorMk, kodeMk, namaKelas, mode, namaMk, sksMk, namaDosenList, jadwalHari)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Delete all kelas (for re-sync)
+deleteAllKelas:
+DELETE FROM KelasEntity;
