@@ -1,22 +1,21 @@
 package com.kelazzz.app.data.repository
 
-import com.kelazzz.app.data.remote.gemini.ChatToolHandler
-import com.kelazzz.app.data.remote.gemini.GeminiContent
-import com.kelazzz.app.data.remote.gemini.GeminiPart
-import com.kelazzz.app.data.remote.gemini.GeminiService
-import com.kelazzz.app.data.remote.gemini.SystemPrompts
+import com.kelazzz.app.data.remote.ai.ChatToolHandler
+import com.kelazzz.app.data.remote.ai.OpenCodeChatMessage
+import com.kelazzz.app.data.remote.ai.OpenCodeGoService
+import com.kelazzz.app.data.remote.ai.SystemPrompts
 import com.kelazzz.app.domain.model.ChatMessage
 import com.kelazzz.app.domain.model.ChatRole
 import com.kelazzz.app.domain.repository.AIRepository
 
 /**
- * Implementasi AIRepository — menghubungkan Gemini API dengan tool calling
+ * Implementasi AIRepository — menghubungkan OpenCode Go API dengan tool calling
  *
  * Flow chat:
  * 1. User kirim pesan
  * 2. ChatToolHandler deteksi intent dan ambil data relevan dari repository
  * 3. Data di-inject sebagai konteks tambahan ke prompt
- * 4. GeminiService kirim ke Gemini API dengan system prompt + conversation history
+ * 4. OpenCodeGoService kirim ke API dengan system prompt + conversation history
  * 5. Return respons AI
  *
  * Prinsip:
@@ -25,12 +24,12 @@ import com.kelazzz.app.domain.repository.AIRepository
  * - Conversation history dikirim untuk konteks multi-turn
  */
 class AIRepositoryImpl(
-    private val geminiService: GeminiService,
+    private val openCodeGoService: OpenCodeGoService,
     private val toolHandler: ChatToolHandler
 ) : AIRepository {
 
     override suspend fun analyzeAttendance(attendanceData: String): Result<String> {
-        return geminiService.generateContent(
+        return openCodeGoService.generateContent(
             prompt = attendanceData,
             systemPrompt = SystemPrompts.ATTENDANCE_ANALYZER
         )
@@ -61,8 +60,8 @@ class AIRepositoryImpl(
             // 3. Bangun conversation history untuk multi-turn context
             val conversationHistory = buildConversationHistory(history)
 
-            // 4. Kirim ke Gemini API
-            geminiService.generateContentWithHistory(
+            // 4. Kirim ke OpenCode Go API
+            openCodeGoService.generateContentWithHistory(
                 prompt = enrichedPrompt,
                 systemPrompt = SystemPrompts.ACADEMIC_ASSISTANT,
                 history = conversationHistory
@@ -78,17 +77,17 @@ class AIRepositoryImpl(
     }
 
     /**
-     * Konversi ChatMessage list menjadi format GeminiContent untuk multi-turn chat
+     * Konversi ChatMessage list menjadi format OpenCode untuk multi-turn chat
      */
-    private fun buildConversationHistory(history: List<ChatMessage>): List<GeminiContent> {
+    private fun buildConversationHistory(history: List<ChatMessage>): List<OpenCodeChatMessage> {
         return history
             .filter { !it.isLoading && it.content.isNotBlank() }
             .map { message ->
-                GeminiContent(
-                    parts = listOf(GeminiPart(text = message.content)),
+                OpenCodeChatMessage(
+                    content = message.content,
                     role = when (message.role) {
                         ChatRole.USER -> "user"
-                        ChatRole.ASSISTANT -> "model"
+                        ChatRole.ASSISTANT -> "assistant"
                     }
                 )
             }

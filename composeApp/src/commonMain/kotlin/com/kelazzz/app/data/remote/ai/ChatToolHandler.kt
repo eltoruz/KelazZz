@@ -1,4 +1,4 @@
-package com.kelazzz.app.data.remote.gemini
+package com.kelazzz.app.data.remote.ai
 
 import com.kelazzz.app.data.local.datastore.UserPreferences
 import com.kelazzz.app.domain.model.AttendanceSummary
@@ -14,7 +14,7 @@ import kotlinx.datetime.toLocalDateTime
  * Handler ini bertanggung jawab:
  * 1. Mendeteksi intent pengguna berdasarkan keyword dalam pesan
  * 2. Mengambil data yang relevan dari repository yang sesuai
- * 3. Menyusun data sebagai konteks tambahan untuk dikirim ke Gemini API
+ * 3. Menyusun data sebagai konteks tambahan untuk dikirim ke AI API
  *
  * Pendekatan: Prompt-based tool routing (keyword detection → data enrichment)
  * 

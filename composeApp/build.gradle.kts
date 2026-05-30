@@ -126,8 +126,8 @@ android {
         // Inject API key from local.properties
         buildConfigField(
             "String",
-            "GEMINI_API_KEY",
-            "\"${localProperties.getProperty("GEMINI_API_KEY", "")}\""
+            "OPENCODE_API_KEY",
+            "\"${localProperties.getProperty("OPENCODE_API_KEY", "")}\""
         )
     }
     
