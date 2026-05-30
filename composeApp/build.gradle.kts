@@ -103,6 +103,9 @@ kotlin {
             implementation(libs.androidx.camera.lifecycle)
             implementation(libs.androidx.camera.view)
             implementation(libs.mlkit.barcode.scanning)
+
+            // Keep transitive native libraries compatible with Android 15+ 16 KB pages.
+            implementation(libs.androidx.graphics.path)
         }
         
 //        iosMain.dependencies {
