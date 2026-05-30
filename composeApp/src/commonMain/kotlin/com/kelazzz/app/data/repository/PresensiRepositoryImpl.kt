@@ -184,8 +184,26 @@ class PresensiRepositoryImpl(
     }
 
     override suspend fun submitPresensi(token: String): Result<Unit> {
-        // Stub untuk pengiriman token presensi
-        return Result.success(Unit)
+        return withContext(Dispatchers.IO) {
+            try {
+                val nim = userPreferences.userNim.first()
+                    ?: return@withContext Result.failure(Exception("NIM mahasiswa tidak ditemukan. Silakan login kembali."))
+
+                val apiResult = apiService.submitPresensi(token = token, nim = nim)
+                if (apiResult.isSuccess) {
+                    val response = apiResult.getOrThrow()
+                    if (response.meta.status) {
+                        Result.success(Unit)
+                    } else {
+                        Result.failure(Exception(response.meta.message))
+                    }
+                } else {
+                    Result.failure(apiResult.exceptionOrNull() ?: Exception("Gagal melakukan presensi."))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
     }
 
     override suspend fun syncPresensi(): Result<Unit> {

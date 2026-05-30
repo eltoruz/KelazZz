@@ -7,6 +7,7 @@ import com.kelazzz.app.presentation.screens.jadwal.addedit.JadwalAddEditViewMode
 import com.kelazzz.app.presentation.screens.login.LoginViewModel
 import com.kelazzz.app.presentation.screens.profile.ProfileViewModel
 import com.kelazzz.app.presentation.screens.rekap.RekapViewModel
+import com.kelazzz.app.presentation.screens.presensi.PresensiViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -28,7 +29,7 @@ val viewModelModule = module {
     // viewModelOf(::HomeViewModel)
     
     // TODO: Sprint 3
-    // viewModelOf(::PresensiViewModel)
+    viewModelOf(::PresensiViewModel)
     // viewModelOf(::DaftarPresensiViewModel)
     
     // TODO: Sprint 4
