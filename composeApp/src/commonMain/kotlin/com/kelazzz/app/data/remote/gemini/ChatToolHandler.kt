@@ -5,6 +5,8 @@ import com.kelazzz.app.domain.model.AttendanceSummary
 import com.kelazzz.app.domain.repository.JadwalRepository
 import com.kelazzz.app.domain.repository.PresensiRepository
 import kotlinx.coroutines.flow.first
+import kotlinx.datetime.toLocalDateTime
+
 
 /**
  * ChatToolHandler — Inti Tool Calling untuk AI Chatbot KelazZz
