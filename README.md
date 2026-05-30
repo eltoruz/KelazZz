@@ -38,7 +38,7 @@ KelazZz adalah aplikasi mobile berbasis **Kotlin Multiplatform (KMP)** dan **Com
 Fokus utama KelazZz adalah:
 - **Mempersingkat dan mengandal-kan alur presensi** — mahasiswa dapat memindai QR code (dengan pemrosesan yang lebih andal menggunakan ML Kit) atau cukup memasukkan token presensi secara manual ke dalam form
 - **Smart Attendance Analytics** — dashboard analitik kehadiran per mata kuliah dengan indikator risiko dan prediksi status aman/tidak aman
-- **AI-powered features** — peringatan dini otomatis dan asisten akademik berbasis Google Gemini API
+- **AI-powered features** — peringatan dini otomatis dan asisten akademik berbasis OpenCode Go API
 - **Offline-first** — data rekap presensi dan kalender akademik pribadi tetap dapat diakses tanpa koneksi internet
 
 > ⚠️ **Disclaimer**
@@ -115,7 +115,7 @@ Contoh peringatan:
 ---
 
 ### 💬 AI Chatbot Asisten Akademik *(Bonus +10%)*
-Tanya aturan dan prosedur akademik ITERA dalam bahasa sehari-hari, dijawab langsung oleh AI berbasis **Gemini API** yang dilengkapi knowledge base informasi akademik ITERA.
+Tanya aturan dan prosedur akademik ITERA dalam bahasa sehari-hari, dijawab langsung oleh AI berbasis **OpenCode Go API** yang dilengkapi knowledge base informasi akademik ITERA.
 
 Contoh pertanyaan:
 - *"Kelas saya berikutnya apa?"*
@@ -174,7 +174,7 @@ Dengan pemisahan ini, fitur presensi tetap dapat diakses saat offline, dan selur
 | Database Lokal | SQLDelight (cache presensi + kalender) |
 | Preferences | DataStore Preferences (session token) |
 | Dependency Injection | Koin |
-| AI | Google Gemini API |
+| AI | OpenCode Go API |
 | Notifications | Firebase Cloud Messaging |
 | Testing | kotlin.test + MockK + Turbine + Compose Test |
 | CI/CD | GitHub Actions |
@@ -219,7 +219,7 @@ KelazZz menggunakan **Clean Architecture** dengan tiga lapisan utama yang saling
 | 3 | **Daftar Presensi** | Rekap kehadiran per mata kuliah + analytics (persentase, heatmap, risiko) |
 | 4 | **Presensi** | QR scan (ML Kit) + input token manual |
 | 5 | **Kalender Akademik** | Buat dan kelola jadwal pribadi secara offline |
-| 6 | **AI Asisten** | Chatbot akademik berbasis Gemini API |
+| 6 | **AI Asisten** | Chatbot akademik berbasis OpenCode Go API |
 | 7 | **Notifikasi** | Pusat notifikasi class reminder dan attendance warning |
 
 ---
@@ -243,7 +243,7 @@ composeApp/
     │       │   │   └── datastore/      # DataStore — session token
     │       │   ├── remote/
     │       │   │   ├── pocket/         # Ktor — Pocket ITERA API
-    │       │   │   └── gemini/         # Ktor — Gemini API
+    │       │   │   └── ai/         # Ktor — OpenCode Go API
     │       │   ├── repository/
     │       │   └── model/
     │       ├── domain/
@@ -306,7 +306,7 @@ cd KelazZz
 ### Setup `local.properties`
 
 ```properties
-GEMINI_API_KEY=your_api_key_here
+OPENCODE_API_KEY=your_api_key_here
 ```
 
 ### Build Project
@@ -332,7 +332,7 @@ Atau langsung melalui **Run > Run 'composeApp'** di Android Studio.
 | Sprint 1 | W11 | Planning, setup repo, CI/CD, arsitektur |
 | Sprint 2 | W12 | Login, navigasi, home screen, DataStore |
 | Sprint 3 | W13 | Daftar presensi, QR scan + ML Kit, manual token, SQLDelight cache |
-| Sprint 4 | W14 | Kalender akademik, Gemini AI, FCM, dark mode, polish |
+| Sprint 4 | W14 | Kalender akademik, OpenCode Go AI, FCM, dark mode, polish |
 | Sprint 5 | W15 | Testing, bug fix, persiapan demo |
 | **UAS** | W16 | **Final Demo Day** |
 
@@ -366,7 +366,7 @@ Atau langsung melalui **Run > Run 'composeApp'** di Android Studio.
 | Task | Assignee |
 |------|----------|
 | Kalender akademik pribadi (CRUD offline) | Bintang |
-| AI Early Warning kehadiran (Gemini API) | Rifael |
+| AI Early Warning kehadiran (OpenCode Go API) | Rifael |
 | AI Chatbot asisten akademik | Rifael |
 | Dark mode + UI polish | Bintang |
 
