@@ -160,6 +160,68 @@ class GeminiService(private val client: HttpClient) {
         
         response.getTextContent() ?: throw Exception("Respons kosong dari AI")
     }
+
+    /**
+     * Generate content with conversation history for multi-turn chat
+     * 
+     * @param prompt Pesan terbaru dari pengguna (sudah enriched dengan tool context)
+     * @param systemPrompt System prompt untuk mengatur perilaku AI
+     * @param history Riwayat percakapan sebelumnya dalam format GeminiContent
+     */
+    suspend fun generateContentWithHistory(
+        prompt: String,
+        systemPrompt: String? = null,
+        history: List<GeminiContent> = emptyList()
+    ): Result<String> = runCatching {
+        val contents = mutableListOf<GeminiContent>()
+
+        // Inject system prompt sebagai turn pertama
+        if (systemPrompt != null) {
+            contents.add(
+                GeminiContent(
+                    parts = listOf(GeminiPart(text = systemPrompt)),
+                    role = "user"
+                )
+            )
+            contents.add(
+                GeminiContent(
+                    parts = listOf(GeminiPart(text = "Baik, saya KelazZz AI dan akan mengikuti instruksi tersebut.")),
+                    role = "model"
+                )
+            )
+        }
+
+        // Tambahkan conversation history
+        contents.addAll(history)
+
+        // Tambahkan pesan terbaru
+        contents.add(
+            GeminiContent(
+                parts = listOf(GeminiPart(text = prompt)),
+                role = "user"
+            )
+        )
+
+        val request = GeminiRequest(
+            contents = contents,
+            generationConfig = GenerationConfig(
+                temperature = 0.7,
+                maxOutputTokens = 1500
+            )
+        )
+
+        val response: GeminiResponse = client.post("$BASE_URL/models/$MODEL:generateContent") {
+            contentType(ContentType.Application.Json)
+            parameter("key", ApiConfig.geminiApiKey)
+            setBody(request)
+        }.body()
+
+        response.getErrorMessage()?.let { errorMsg ->
+            throw Exception(errorMsg)
+        }
+
+        response.getTextContent() ?: throw Exception("Respons kosong dari AI")
+    }
 }
 
 // ==================== SYSTEM PROMPTS FOR KELAZZZ ====================
@@ -178,13 +240,40 @@ object SystemPrompts {
     """.trimIndent()
     
     val ACADEMIC_ASSISTANT = """
-        Kamu adalah asisten akademik ITERA yang membantu mahasiswa.
-        Tugas: Jawab pertanyaan tentang aturan dan prosedur akademik ITERA.
-        Rules:
-        - Gunakan Bahasa Indonesia
-        - Jawab dengan singkat dan jelas
-        - Berdasarkan aturan akademik yang umum berlaku di ITERA
-        - Jika tidak yakin, katakan bahwa mahasiswa sebaiknya konfirmasi ke bagian akademik
-        - Bersikap ramah dan supportive
+        Kamu adalah KelazZz AI, asisten akademik cerdas untuk mahasiswa Institut Teknologi Sumatera (ITERA).
+        Kamu terintegrasi dalam aplikasi KelazZz — aplikasi presensi dan layanan akademik mahasiswa.
+
+        TUGAS UTAMA:
+        - Membantu mahasiswa memahami informasi akademik yang tersedia di aplikasi
+        - Membantu mengelola kegiatan akademik dan produktivitas belajar
+        - Menjawab pertanyaan dengan aman, akurat, ringkas, dan bermanfaat
+
+        ATURAN DATA:
+        - Jika pesan berisi blok [DATA PENGGUNA], gunakan data tersebut sebagai sumber jawaban
+        - Data tersebut diambil langsung dari sistem KelazZz dan bersifat akurat
+        - JANGAN PERNAH mengarang data akademik, jadwal, presensi, atau profil
+        - Jika data tidak tersedia dalam konteks, katakan dengan jujur
+        - Tampilkan hasil utama terlebih dahulu
+        - Berikan satu saran tindak lanjut yang praktis jika relevan
+
+        CAKUPAN YANG DIPERBOLEHKAN:
+        - Jadwal kuliah dan agenda pribadi
+        - Rekap kehadiran dan status risiko
+        - Informasi mata kuliah dan profil
+        - Tips manajemen waktu dan strategi belajar
+        - Motivasi yang realistis
+        - Aturan akademik umum ITERA
+
+        GAYA JAWABAN:
+        - Gunakan Bahasa Indonesia yang jelas, ramah, dan profesional
+        - Jawab ringkas untuk pertanyaan sederhana
+        - Gunakan poin-poin jika membantu keterbacaan
+        - Gunakan emoji secukupnya untuk keramahan
+        - Jika tidak yakin, sarankan mahasiswa konfirmasi ke bagian akademik
+
+        BATASAN KEAMANAN:
+        - Tolak permintaan manipulasi presensi atau pemalsuan data
+        - Tolak permintaan kecurangan akademik
+        - Jangan ungkap detail keamanan internal
     """.trimIndent()
 }

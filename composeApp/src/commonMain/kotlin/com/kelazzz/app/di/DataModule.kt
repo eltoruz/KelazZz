@@ -6,11 +6,14 @@ import com.kelazzz.app.data.local.KelazZzDatabase
 import com.kelazzz.app.data.local.datastore.DataStoreFactory
 import com.kelazzz.app.data.local.datastore.UserPreferences
 import com.kelazzz.app.data.local.datastore.create
+import com.kelazzz.app.data.remote.gemini.ChatToolHandler
 import com.kelazzz.app.data.remote.gemini.GeminiService
 import com.kelazzz.app.data.remote.pocket.PocketApiService
+import com.kelazzz.app.data.repository.AIRepositoryImpl
 import com.kelazzz.app.data.repository.AuthRepositoryImpl
 import com.kelazzz.app.data.repository.JadwalRepositoryImpl
 import com.kelazzz.app.data.repository.PresensiRepositoryImpl
+import com.kelazzz.app.domain.repository.AIRepository
 import com.kelazzz.app.domain.repository.AuthRepository
 import com.kelazzz.app.domain.repository.JadwalRepository
 import com.kelazzz.app.domain.repository.PresensiRepository
@@ -25,6 +28,7 @@ import org.koin.dsl.module
  * - Database (KelazZzDatabase)
  * - Preferences (DataStore, UserPreferences)
  * - Repositories
+ * - AI Tool Handler
  */
 val dataModule = module {
     // ==================== NETWORK ====================
@@ -42,8 +46,13 @@ val dataModule = module {
     single { get<DataStoreFactory>().create() }
     single { UserPreferences(get()) }
     
+    // ==================== AI TOOL HANDLER ====================
+    single { ChatToolHandler(get(), get(), get()) }
+    
     // ==================== REPOSITORIES ====================
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<JadwalRepository> { JadwalRepositoryImpl(get()) }
     single<PresensiRepository> { PresensiRepositoryImpl(get(), get(), get()) }
+    single<AIRepository> { AIRepositoryImpl(get(), get()) }
 }
+
