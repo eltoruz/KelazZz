@@ -4,6 +4,9 @@
     <!-- Internet permission for API calls -->
     <uses-permission android:name="android.permission.INTERNET" />
     
+    <!-- Camera permission for QR code scanning -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:name=".KelazZzApplication"
         android:allowBackup="true"
