@@ -4,12 +4,11 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
+import android.util.Log
 import com.kelazzz.app.domain.model.Jadwal
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class AndroidJadwalNotificationScheduler(
     private val context: Context
@@ -30,24 +29,18 @@ class AndroidJadwalNotificationScheduler(
         val triggerAtMillis = scheduleAtMillis - offsetMinutes * 60_000L
 
         if (triggerAtMillis <= System.currentTimeMillis()) {
+            Log.w(TAG, "Reminder skipped because trigger time is in the past: jadwalId=${jadwal.id}")
             cancel(jadwal.id)
             return
         }
 
         val pendingIntent = createPendingIntent(jadwal, PendingIntent.FLAG_UPDATE_CURRENT)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerAtMillis,
-                pendingIntent
-            )
-        } else {
-            alarmManager.set(
-                AlarmManager.RTC_WAKEUP,
-                triggerAtMillis,
-                pendingIntent
-            )
-        }
+        alarmManager.set(
+            AlarmManager.RTC_WAKEUP,
+            triggerAtMillis,
+            pendingIntent
+        )
+        Log.d(TAG, "Reminder scheduled: jadwalId=${jadwal.id}, triggerAtMillis=$triggerAtMillis")
     }
 
     override suspend fun cancel(jadwalId: Long) {
@@ -61,6 +54,7 @@ class AndroidJadwalNotificationScheduler(
         if (pendingIntent != null) {
             alarmManager.cancel(pendingIntent)
             pendingIntent.cancel()
+            Log.d(TAG, "Reminder cancelled: jadwalId=$jadwalId")
         }
     }
 
@@ -84,15 +78,25 @@ class AndroidJadwalNotificationScheduler(
     }
 
     private fun parseScheduleMillis(jadwal: Jadwal): Long? {
-        val date = runCatching { LocalDate.parse(jadwal.tanggal.trim()) }.getOrNull()
-            ?: return null
         val startTimeText = jadwal.waktu.substringBefore("-").trim()
-        val time = runCatching { LocalTime.parse(startTimeText) }.getOrNull()
-            ?: return null
-        return LocalDateTime.of(date, time)
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
+        val date = runCatching { DATE_FORMAT.parse(jadwal.tanggal.trim()) }.getOrNull() ?: return null
+        val timeParts = startTimeText.split(":")
+        val hour = timeParts.getOrNull(0)?.toIntOrNull() ?: return null
+        val minute = timeParts.getOrNull(1)?.toIntOrNull() ?: return null
+        if (hour !in 0..23 || minute !in 0..59) return null
+
+        return Calendar.getInstance().apply {
+            time = date
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
+
+    companion object {
+        private const val TAG = "JadwalReminder"
+        private val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }
 }
 

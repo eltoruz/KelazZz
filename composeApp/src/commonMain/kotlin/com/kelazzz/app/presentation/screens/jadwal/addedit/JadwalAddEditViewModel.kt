@@ -96,7 +96,7 @@ class JadwalAddEditViewModel(
         if (state.formReminderOption != ReminderOption.NONE && !isValidSchedulableDateTime(state.formTanggal, state.formWaktu)) {
             _uiState.update {
                 it.copy(
-                    formError = "Untuk notifikasi, gunakan tanggal format YYYY-MM-DD dan waktu awal HH:mm."
+                    formError = "Pilih tanggal dan waktu mulai agar notifikasi bisa dijadwalkan."
                 )
             }
             return

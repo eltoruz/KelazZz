@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kelazzz.app.domain.model.JenisJadwal
 import com.kelazzz.app.domain.model.ReminderOption
+import com.kelazzz.app.presentation.components.ScheduleDateField
+import com.kelazzz.app.presentation.components.ScheduleTimeField
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -107,38 +109,18 @@ fun JadwalAddEditScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    // Day / Tanggal Field
-                    OutlinedTextField(
+                    // Date Field
+                    ScheduleDateField(
                         value = uiState.formTanggal,
                         onValueChange = viewModel::onTanggalChange,
-                        label = { Text("Hari / Tanggal") },
-                        placeholder = { Text("cth: 2026-06-10") },
-                        singleLine = true,
                         isError = uiState.formError != null && uiState.formTanggal.isBlank(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
-                        ),
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     // Time Field
-                    OutlinedTextField(
+                    ScheduleTimeField(
                         value = uiState.formWaktu,
                         onValueChange = viewModel::onWaktuChange,
-                        label = { Text("Waktu") },
-                        placeholder = { Text("cth: 08:00 atau 08:00 - 10:30") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
-                        ),
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -208,7 +190,7 @@ fun JadwalAddEditScreen(
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Opsional. Jika aktif, tanggal harus YYYY-MM-DD dan waktu harus diawali HH:mm.",
+                            text = "Opsional. Pilih kapan KelazZz mengingatkan sebelum agenda dimulai.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

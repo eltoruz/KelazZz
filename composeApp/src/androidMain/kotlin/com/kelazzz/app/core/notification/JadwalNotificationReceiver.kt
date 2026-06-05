@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import com.kelazzz.app.MainActivity
 import com.kelazzz.app.R
 
@@ -19,6 +20,7 @@ class JadwalNotificationReceiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) {
+            Log.w(TAG, "Notification skipped because POST_NOTIFICATIONS is not granted")
             return
         }
 
@@ -89,6 +91,7 @@ class JadwalNotificationReceiver : BroadcastReceiver() {
         description: String
     ): String {
         val reminderText = when (offsetMinutes) {
+            1L -> "dimulai 1 menit lagi"
             10L -> "dimulai 10 menit lagi"
             30L -> "dimulai 30 menit lagi"
             60L -> "dimulai 1 jam lagi"
@@ -107,6 +110,7 @@ class JadwalNotificationReceiver : BroadcastReceiver() {
     }
 
     companion object {
+        private const val TAG = "JadwalReminder"
         const val CHANNEL_ID = "jadwal_reminders"
         const val EXTRA_JADWAL_ID = "extra_jadwal_id"
         const val EXTRA_TITLE = "extra_title"

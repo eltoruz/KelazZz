@@ -87,6 +87,7 @@ data class Jadwal(
  */
 enum class ReminderOption(val displayName: String, val offsetMinutes: Long?) {
     NONE("Tidak ada", null),
+    ONE_MINUTE("1 menit", 1),
     TEN_MINUTES("10 menit", 10),
     THIRTY_MINUTES("30 menit", 30),
     ONE_HOUR("1 jam", 60),
