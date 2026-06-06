@@ -191,7 +191,23 @@ class UserPreferences(
     }
     
     /**
-     * Clear all preferences (full logout)
+     * Clear only session-related preferences during logout, preserving app preferences (theme, onboarding).
+     */
+    suspend fun clearSession() {
+        dataStore.edit { prefs ->
+            prefs.remove(Keys.AUTH_TOKEN)
+            prefs[Keys.IS_LOGGED_IN] = false
+            prefs.remove(Keys.USER_NIM)
+            prefs.remove(Keys.USER_NAME)
+            prefs.remove(Keys.USER_EMAIL)
+            prefs.remove(Keys.USER_PHOTO_URL)
+            prefs.remove(Keys.DEVICE_NAME)
+            prefs.remove(Keys.DEVICE_ID)
+        }
+    }
+
+    /**
+     * Clear all preferences (full factory reset)
      */
     suspend fun clearAll() {
         dataStore.edit { prefs ->

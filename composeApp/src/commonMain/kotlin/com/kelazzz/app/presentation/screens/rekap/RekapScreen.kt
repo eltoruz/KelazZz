@@ -667,6 +667,16 @@ private fun PertemuanItemRow(
                     badgeTextColor = Color(0xFFC62828)
                     badgeText = "Alpha"
                 }
+                com.kelazzz.app.domain.model.StatusPresensi.IZIN -> {
+                    badgeColor = Color(0xFFFFF3E0)
+                    badgeTextColor = Color(0xFFE65100)
+                    badgeText = "Izin"
+                }
+                com.kelazzz.app.domain.model.StatusPresensi.SAKIT -> {
+                    badgeColor = Color(0xFFE3F2FD)
+                    badgeTextColor = Color(0xFF1565C0)
+                    badgeText = "Sakit"
+                }
                 com.kelazzz.app.domain.model.StatusPresensi.BELUM_MULAI -> {
                     badgeColor = MaterialTheme.colorScheme.surfaceVariant
                     badgeTextColor = MaterialTheme.colorScheme.onSurfaceVariant

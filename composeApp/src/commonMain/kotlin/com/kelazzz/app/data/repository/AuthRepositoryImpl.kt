@@ -80,7 +80,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() {
-        preferences.clearAll()
+        preferences.clearSession()
     }
 
     override val isLoggedIn: Flow<Boolean> = preferences.isLoggedIn
