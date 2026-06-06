@@ -16,6 +16,7 @@ coil = "3.0.4"
 camerax = "1.4.2"
 mlkit-barcode = "18.3.1"
 graphics-path = "1.1.0"
+kover = "0.8.3"
 
 # Testing
 turbine = "1.2.0"
@@ -84,3 +85,4 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+kotlinxKover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
