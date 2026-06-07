@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 
 class JadwalAddEditViewModel(
     private val repository: JadwalRepository,
@@ -131,12 +132,8 @@ class JadwalAddEditViewModel(
     }
 
     private fun isValidSchedulableDateTime(tanggal: String, waktu: String): Boolean {
-        val dateParts = tanggal.trim().split("-")
-        if (dateParts.size != 3) return false
-        val year = dateParts[0].toIntOrNull() ?: return false
-        val month = dateParts[1].toIntOrNull() ?: return false
-        val day = dateParts[2].toIntOrNull() ?: return false
-        if (year !in 2000..2100 || month !in 1..12 || day !in 1..31) return false
+        val date = runCatching { LocalDate.parse(tanggal.trim()) }.getOrNull() ?: return false
+        if (date.year !in 2000..2100) return false
 
         val startTime = waktu.substringBefore("-").trim()
         val timeParts = startTime.split(":")

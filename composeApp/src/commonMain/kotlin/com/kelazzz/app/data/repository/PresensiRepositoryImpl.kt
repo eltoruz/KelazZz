@@ -345,9 +345,12 @@ class PresensiRepositoryImpl(
     }
 
     private fun PresensiData.toStatus(): String {
+        val normalizedStatus = absenMahasiswa?.trim()?.lowercase()
         return when {
             pertemuan.isNullOrBlank() || waktuMulai.isNullOrBlank() -> "BELUM_MULAI"
-            absenMahasiswa == "1" -> "HADIR"
+            normalizedStatus in listOf("1", "hadir", "h", "true") -> "HADIR"
+            normalizedStatus in listOf("2", "izin", "i") -> "IZIN"
+            normalizedStatus in listOf("3", "sakit", "s") -> "SAKIT"
             else -> "ALPHA"
         }
     }
