@@ -146,7 +146,7 @@ fun LoginScreen(
                     )
 
                     Text(
-                        text = "Gunakan akun Pocket ITERA",
+                        text = "Gunakan akun mahasiswa Pocket ITERA",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -157,7 +157,7 @@ fun LoginScreen(
                     OutlinedTextField(
                         value = uiState.username,
                         onValueChange = viewModel::onUsernameChange,
-                        label = { Text("Email ITERA") },
+                        label = { Text("Email Mahasiswa ITERA") },
                         placeholder = { Text("nama.nim@student.itera.ac.id") },
                         leadingIcon = {
                             Icon(
