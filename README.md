@@ -10,6 +10,10 @@ Project ini dibuat untuk mata kuliah Pengembangan Aplikasi Mobile. Target aktif 
 
 > Disclaimer: aplikasi ini dibuat untuk kebutuhan akademik dan pembelajaran. KelazZz tetap menggunakan autentikasi resmi pengguna Pocket ITERA dan tidak melakukan bypass keamanan, modifikasi sistem kampus, atau akses ke akun pengguna lain.
 
+## Video Demo
+
+Video demo aplikasi: [https://youtu.be/GpRTtH88aHk](https://youtu.be/GpRTtH88aHk)
+
 ## Tim Pengembang
 
 | Nama | NIM | GitHub | Role |
@@ -170,6 +174,50 @@ Use case utama yang digunakan:
 | Profile | Data pengguna, pilihan tema, dan logout |
 
 Catatan: route `Notifikasi` belum menjadi screen aktif di NavHost. Pengingat jadwal tetap berjalan melalui mekanisme notifikasi lokal Android.
+
+## Screenshot Aplikasi
+
+Ganti bagian `PASTE_LINK_SCREEN_...` dengan link gambar dari GitHub user attachments.
+
+### Login
+
+![Login](PASTE_LINK_SCREEN_LOGIN)
+
+### Home
+
+![Home](PASTE_LINK_SCREEN_HOME)
+
+### Rekap Presensi
+
+![Rekap Presensi](PASTE_LINK_SCREEN_REKAP_PRESENSI)
+
+### Presensi
+
+![Presensi](PASTE_LINK_SCREEN_PRESENSI)
+
+### Jadwal
+
+![Jadwal](PASTE_LINK_SCREEN_JADWAL)
+
+### Tambah/Edit Jadwal
+
+![Tambah Edit Jadwal](PASTE_LINK_SCREEN_TAMBAH_EDIT_JADWAL)
+
+### Detail Jadwal
+
+![Detail Jadwal](PASTE_LINK_SCREEN_DETAIL_JADWAL)
+
+### Kalender
+
+![Kalender](PASTE_LINK_SCREEN_KALENDER)
+
+### AI Asisten
+
+![AI Asisten](PASTE_LINK_SCREEN_AI_ASISTEN)
+
+### Profil
+
+![Profil](PASTE_LINK_SCREEN_PROFIL)
 
 ## Struktur Proyek
 
