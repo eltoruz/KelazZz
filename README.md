@@ -177,47 +177,42 @@ Catatan: route `Notifikasi` belum menjadi screen aktif di NavHost. Pengingat jad
 
 ## Screenshot Aplikasi
 
-Ganti bagian `PASTE_LINK_SCREEN_...` dengan link gambar dari GitHub user attachments.
-
 ### Login
 
-![Login](PASTE_LINK_SCREEN_LOGIN)
+![Login](https://github.com/user-attachments/assets/d84eeb89-ecc8-4058-adbd-72ee23a0241c)
 
 ### Home
 
-![Home](PASTE_LINK_SCREEN_HOME)
+![Home](https://github.com/user-attachments/assets/4eab9f24-50d0-41e8-8535-754a165554e2)
 
 ### Rekap Presensi
 
-![Rekap Presensi](PASTE_LINK_SCREEN_REKAP_PRESENSI)
+![Rekap Presensi](https://github.com/user-attachments/assets/2c48acbf-a726-481e-b465-021f521992d0)
 
 ### Presensi
 
-![Presensi](PASTE_LINK_SCREEN_PRESENSI)
+![Presensi](https://github.com/user-attachments/assets/053dee52-3a5d-4c33-a6f6-71a26955cf58)
+![Presensi](https://github.com/user-attachments/assets/3839298d-3cd3-4c6e-8070-1c2568d661bc)
 
 ### Jadwal
 
-![Jadwal](PASTE_LINK_SCREEN_JADWAL)
+![Jadwal](https://github.com/user-attachments/assets/e54cf9d4-a9ff-4000-84ba-5a5ff744264a)
 
 ### Tambah/Edit Jadwal
 
-![Tambah Edit Jadwal](PASTE_LINK_SCREEN_TAMBAH_EDIT_JADWAL)
+![Tambah Edit Jadwal](https://github.com/user-attachments/assets/c409b870-f338-4ccf-b0f7-3a2fb3033023)
 
 ### Detail Jadwal
 
-![Detail Jadwal](PASTE_LINK_SCREEN_DETAIL_JADWAL)
-
-### Kalender
-
-![Kalender](PASTE_LINK_SCREEN_KALENDER)
+![Detail Jadwal](https://github.com/user-attachments/assets/57aaee4a-238c-4224-a9d8-5ed74c7593a0)
 
 ### AI Asisten
 
-![AI Asisten](PASTE_LINK_SCREEN_AI_ASISTEN)
+![AI Asisten](https://github.com/user-attachments/assets/9a3e50c1-6da9-489a-956d-6e7dd56ccd47)
 
 ### Profil
 
-![Profil](PASTE_LINK_SCREEN_PROFIL)
+![Profil](https://github.com/user-attachments/assets/4228d076-325a-4f9d-920f-bdf901545424)
 
 ## Struktur Proyek
 
